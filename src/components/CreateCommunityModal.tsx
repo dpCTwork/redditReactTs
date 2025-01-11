@@ -1,6 +1,7 @@
 import React, { useState } from "react"
 import { api } from "../../convex/_generated/api"
 import "../styles/CreateCommunityModal.css"
+import { useMutation } from "convex/react"
 
 type CreateCommunityModalProps = {
 	isOpen: boolean
@@ -13,9 +14,42 @@ const CreateCommunityModal = ({ isOpen, onClose }: CreateCommunityModalProps) =>
 	const [error, setError] = useState("")
 	const [isLoading, setIsLoading] = useState(false)
 
+	const createSubreddit = useMutation(api.subreddit.create)
+
 	if (!isOpen) return null
 
-	const handleSubmit = async (e: React.FormEvent) => {}
+	const handleSubmit = async (e: React.FormEvent) => {
+		e.preventDefault()
+		setError("")
+
+		if (!name) {
+			setError("Community name is required")
+			return
+		}
+
+		if (name.length < 3 || name.length > 21) {
+			setError("Community name must be between 3 and 21 characters")
+			return
+		}
+
+		if (!/^[a-zA-Z0-9_]+$/.test(name)) {
+			setError("Community name can only contain letters, numbers, and underscores")
+			return
+		}
+
+		setIsLoading(true)
+
+		await createSubreddit({ name, description })
+			.then((res) => {
+				console.log(res)
+				onClose()
+			})
+			.catch((err) => {
+				setError(`Failed to create community: ${err.data.message}`)
+				setIsLoading(false)
+			})
+			.finally(() => setIsLoading(false))
+	}
 
 	return (
 		<>
