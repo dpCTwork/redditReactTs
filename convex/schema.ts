@@ -13,4 +13,15 @@ export default defineSchema({
 		description: v.optional(v.string()),
 		authorId: v.id("users"),
 	}),
+
+	//  Define a new table called `post` with the following fields:
+	post: defineTable({
+		subject: v.string(),
+		body: v.string(),
+		subreddit: v.id("subreddit"),
+		authorId: v.id("users"),
+		image: v.optional(v.id("_storage")),
+	})
+		.index("bySubreddit", ["subreddit"])
+		.index("byAuthor", ["authorId"]),
 })
